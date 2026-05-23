@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Letter — Kerning Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d1117;
+            font-family: 'VT323', monospace;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* ===== SCREENS ===== */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== SPLASH ===== */
+        .splash { text-align: center; padding: 60px 20px; }
+        .splash-emoji { font-size: 72px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        .splash h1 { font-size: 52px; color: #58a6ff; font-weight: normal; margin-bottom: 10px; text-shadow: 0 0 20px rgba(88,166,255,0.2); }
+        .splash p { font-size: 24px; color: #8b949e; margin-bottom: 40px; }
+        .locked-box {
+            background: #161b22; border: 2px solid #30363d; border-radius: 14px;
+            padding: 30px; margin: 30px auto; max-width: 420px;
+        }
+        .locked-box .lock { font-size: 40px; margin-bottom: 15px; }
+        .locked-box p { font-size: 22px; color: #8b949e; line-height: 1.6; margin: 0; }
+        .locked-box .accent { color: #f0883e; }
+        .start-btn {
+            font-family: 'VT323', monospace; font-size: 28px; padding: 16px 48px;
+            background: #238636; color: #fff; border: none; border-radius: 10px;
+            cursor: pointer; margin-top: 35px; letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+        .start-btn:hover { background: #2ea043; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(35,134,54,0.35); }
+
+        /* ===== GAME ===== */
+        .game { padding: 20px 10px; }
+        .game-header { text-align: center; margin-bottom: 25px; }
+        .game-header h2 { font-size: 40px; color: #58a6ff; font-weight: normal; margin-bottom: 6px; }
+        .game-header .sub { font-size: 22px; color: #8b949e; }
+
+        .target-bar {
+            display: flex; justify-content: center; gap: 10px;
+            margin-bottom: 25px;
+        }
+        .target-pill {
+            background: #161b22; border: 2px solid #30363d; border-radius: 10px;
+            padding: 10px 24px; font-size: 22px; display: flex; align-items: center; gap: 10px;
+        }
+        .target-pill .label { color: #8b949e; }
+        .target-pill .value { color: #f0883e; font-size: 26px; }
+
+        /* WORD DISPLAY — CLEAR & SPACED */
+        .word-box {
+            background: #161b22; border: 2px solid #30363d; border-radius: 16px;
+            padding: 40px 20px 30px; margin: 20px 0; text-align: center;
+        }
+
+        .letters-row {
+            display: flex; justify-content: center; align-items: baseline;
+            gap: 4px; min-height: 100px; margin-bottom: 30px;
+        }
+
+        .letter-item {
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+        }
+
+        .letter-char {
+            font-size: 80px; line-height: 1; color: #e6edf3;
+            transition: all 0.2s; min-width: 50px; text-align: center;
+        }
+
+        /* Gap indicator between letters */
+        .gap-box {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-end; padding-bottom: 8px;
+            min-width: 60px;
+        }
+
+        .gap-line {
+            width: 100%; height: 3px; background: #30363d;
+            border-radius: 2px; margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .gap-line.good { background: #3fb950; box-shadow: 0 0 8px rgba(63,185,80,0.4); }
+        .gap-line.ok { background: #f0883e; }
+        .gap-line.bad { background: #f85149; }
+
+        .gap-label {
+            font-size: 16px; color: #6e7681;
+        }
+
+        /* SLIDERS — ONE PER GAP */
+        .sliders-area {
+            display: flex; justify-content: center; align-items: flex-start;
+            gap: 10px; padding: 15px 10px;
+        }
+
+        .slider-block {
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 80px;
+        }
+
+        .slider-pair-label {
+            font-size: 18px; color: #8b949e; margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .slider-wrap {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px;
+        }
+
+        .slider-track {
+            width: 60px; height: 140px;
+            -webkit-appearance: none; appearance: none;
+            background: #21262d; border-radius: 8px; outline: none;
+            border: 2px solid #30363d; cursor: pointer;
+            writing-mode: bt-lr; /* vertical */
+            -webkit-appearance: slider-vertical;
+        }
+
+        /* For browsers that don't support vertical slider natively */
+        .slider-vertical {
+            transform: rotate(-90deg);
+            width: 140px; height: 60px;
+            margin: 40px 0;
+        }
+
+        .slider-track::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 44px; height: 44px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 12px rgba(88,166,255,0.4);
+            transition: transform 0.1s;
+        }
+
+        .slider-track::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(88,166,255,0.6);
+        }
+
+        .slider-track::-moz-range-thumb {
+            width: 44px; height: 44px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+        }
+
+        .slider-num {
+            font-size: 28px; color: #f0883e; font-weight: bold;
+            min-width: 50px; text-align: center; margin-top: 8px;
+        }
+
+        /* Horizontal slider fallback for mobile */
+        .slider-h {
+            width: 100%; max-width: 200px; height: 16px;
+            -webkit-appearance: none; appearance: none;
+            background: #21262d; border-radius: 8px; outline: none;
+            border: 2px solid #30363d; cursor: pointer;
+        }
+
+        .slider-h::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 40px; height: 40px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 12px rgba(88,166,255,0.4);
+        }
+
+        .slider-h::-moz-range-thumb {
+            width: 40px; height: 40px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+        }
+
+        /* Hint */
+        .hint-box {
+            background: #0d1117; border-left: 4px solid #58a6ff;
+            padding: 15px 20px; margin: 20px 0;
+            font-size: 20px; color: #8b949e; line-height: 1.5;
+        }
+
+        .hint-box .tip { color: #58a6ff; }
+
+        /* Feedback */
+        .feedback-area {
+            min-height: 60px; margin: 20px 0;
+            font-size: 26px; text-align: center;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 5px;
+        }
+
+        .feedback-area.success { color: #3fb950; }
+        .feedback-area.fail { color: #f85149; }
+        .feedback-area.neutral { color: #8b949e; }
+
+        /* Score preview during play */
+        .live-score {
+            font-size: 18px; color: #6e7681; margin-top: 5px;
+        }
+
+        /* Buttons */
+        .btn-row { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
+
+        .btn {
+            font-family: 'VT323', monospace; font-size: 24px;
+            padding: 14px 36px; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-submit {
+            background: #238636; color: #fff;
+        }
+        .btn-submit:hover { background: #2ea043; box-shadow: 0 4px 16px rgba(35,134,54,0.35); }
+        .btn-submit:disabled {
+            background: #21262d; color: #484f58; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
+
+        .btn-reset {
+            background: #21262d; color: #8b949e;
+            border: 2px solid #30363d;
+        }
+        .btn-reset:hover { background: #30363d; color: #c9d1d9; }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.5s ease-in-out; }
+
+        @keyframes flash-red {
+            0%, 100% { border-color: #30363d; }
+            25%, 75% { border-color: #f85149; }
+            50% { border-color: #da3633; }
+        }
+        .flash-fail { animation: flash-red 0.6s ease-in-out 2; }
+
+        /* ===== RESULT ===== */
+        .result { text-align: center; padding: 60px 20px; }
+        .result-emoji { font-size: 64px; margin-bottom: 20px; }
+        .result h2 { font-size: 44px; font-weight: normal; margin-bottom: 12px; }
+        .result-score { font-size: 60px; color: #ffd700; margin: 15px 0; text-shadow: 0 0 25px rgba(255,215,0,0.25); }
+        .result-msg { font-size: 24px; color: #8b949e; max-width: 440px; margin: 15px auto; line-height: 1.5; }
+        .countdown { font-size: 22px; color: #8b949e; margin-top: 20px; }
+        .countdown span { color: #f0883e; font-size: 30px; }
+
+        .btn-unlock {
+            display: none; font-family: 'VT323', monospace; font-size: 28px;
+            padding: 18px 48px; background: #ffd700; color: #0d1117;
+            border: none; border-radius: 12px; cursor: pointer;
+            margin-top: 35px; font-weight: bold; letter-spacing: 2px;
+            animation: pulse-gold 1.5s infinite;
+        }
+        .btn-unlock.show { display: inline-block; }
+        .btn-unlock:hover { transform: scale(1.05); }
+
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.35); }
+            50% { box-shadow: 0 0 25px 10px rgba(255,215,0,0.15); }
+        }
+
+        /* ===== FAREWELL ===== */
+        .farewell { padding: 20px 10px; }
+        .farewell-header { text-align: center; margin-bottom: 25px; }
+        .farewell-header .icon { font-size: 56px; margin-bottom: 10px; }
+        .farewell-header h2 { font-size: 40px; color: #58a6ff; font-weight: normal; }
+
+        .letter-card {
+            background: #161b22; border: 2px solid #30363d; border-radius: 16px;
+            padding: 35px; font-size: 22px; line-height: 1.65; color: #c9d1d9;
+        }
+        .letter-card p { margin-bottom: 18px; }
+        .letter-card .accent { color: #f0883e; }
+
+        .gift-box {
+            background: #0d1117; border: 2px solid #f0883e; border-radius: 12px;
+            padding: 28px; margin: 28px 0; text-align: center;
+        }
+        .gift-title { font-size: 28px; color: #ffd700; margin-bottom: 12px; }
+        .gift-text { font-size: 20px; color: #8b949e; line-height: 1.6; }
+
+        .signature { text-align: right; margin-top: 35px; color: #58a6ff; font-size: 26px; }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .splash h1 { font-size: 38px; }
+            .letter-char { font-size: 56px; }
+            .game-header h2 { font-size: 32px; }
+            .btn { font-size: 20px; padding: 12px 24px; }
+            .sliders-area { gap: 5px; }
+            .slider-block { min-width: 60px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ==================== SPLASH ==================== -->
+        <div class="screen active" id="screen-splash">
+            <div class="splash">
+                <div class="splash-emoji">📬</div>
+                <h1>SURAT TERKUNCI</h1>
+                <p>Ada sesuatu yang menunggu untuk dibuka...</p>
+
+                <div class="locked-box">
+                    <div class="lock">🔐</div>
+                    <p>
+                        Surat ini bisa dibuka dengan<br>
+                        menyelesaikan <span class="accent">1 tantangan kerning</span>.<<br><br>
+                        Atur jarak huruf sampai terlihat pas.<br>
+                        Target: <span class="accent">skor ≥ 70%</span>
+                    </p>
+                </div>
+
+                <button class="start-btn" onclick="goToGame()">▶ BUKA KUNCI</button>
+            </div>
+        </div>
+
+        <!-- ==================== GAME ==================== -->
+        <div class="screen" id="screen-game">
+            <div class="game">
+                <div class="game-header">
+                    <h2>KERNING CHALLENGE</h2>
+                    <p class="sub">Atur jarak antar huruf</p>
+                </div>
+
+                <div class="target-bar">
+                    <div class="target-pill">
+                        <span class="label">TARGET:</span>
+                        <span class="value">≥ 70%</span>
+                    </div>
+                </div>
+
+                <!-- LETTERS DISPLAY -->
+                <div class="word-box" id="word-box">
+                    <div class="letters-row" id="letters-row">
+                        <!-- W -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-0">W</div>
+                        </div>
+                        <!-- Gap 0: W-A -->
+                        <div class="gap-box" id="gap-0">
+                            <div class="gap-line" id="gapline-0"></div>
+                            <div class="gap-label">W-A</div>
+                        </div>
+                        <!-- A -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-1">A</div>
+                        </div>
+                        <!-- Gap 1: A-V -->
+                        <div class="gap-box" id="gap-1">
+                            <div class="gap-line" id="gapline-1"></div>
+                            <div class="gap-label">A-V</div>
+                        </div>
+                        <!-- V -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-2">V</div>
+                        </div>
+                        <!-- Gap 2: V-E -->
+                        <div class="gap-box" id="gap-2">
+                            <div class="gap-line" id="gapline-2"></div>
+                            <div class="gap-label">V-E</div>
+                        </div>
+                        <!-- E -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-3">E</div>
+                        </div>
+                    </div>
+
+                    <!-- SLIDERS -->
+                    <div class="sliders-area" id="sliders-area">
+                        <!-- Slider for W-A -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">W ↔ A</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(0, this.value)" id="slider-0">
+                                <div class="slider-num" id="num-0">0</div>
+                            </div>
+                        </div>
+                        <!-- Slider for A-V -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">A ↔ V</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(1, this.value)" id="slider-1">
+                                <div class="slider-num" id="num-1">0</div>
+                            </div>
+                        </div>
+                        <!-- Slider for V-E -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">V ↔ E</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(2, this.value)" id="slider-2">
+                                <div class="slider-num" id="num-2">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hint-box">
+                    <span class="tip">💡 TIPS:</span> Geser slider ke <b>kiri</b> untuk rapatkan, ke <b>kanan</b> untuk renggangkan. Garis di atas akan berubah warna: <span style="color:#3fb950;">hijau</span> = pas, <span style="color:#f0883e;">oren</span> = hampir, <span style="color:#f85149;">merah</span> = jauh!
+                </div>
+
+                <div class="feedback-area neutral" id="feedback">
+                    <div>Geser slider sampai garisnya hijau!</div>
+                    <div class="live-score" id="live-score"></div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-submit" id="btn-submit" onclick="submitGame()">▶ SUBMIT</button>
+                    <button class="btn btn-reset" onclick="resetGame()">↺ RESET</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RESULT ==================== -->
+        <div class="screen" id="screen-result">
+            <div class="result">
+                <div class="result-emoji" id="res-emoji">🎯</div>
+                <h2 id="res-title">HASIL</h2>
+                <div class="result-score" id="res-score">0%</div>
+                <p class="result-msg" id="res-msg"></p>
+                <p class="countdown" id="countdown"></p>
+
+                <button class="btn-unlock" id="btn-unlock" onclick="goToFarewell()">📬 BUKA SURAT</button>
+            </div>
+        </div>
+
+        <!-- ==================== FAREWELL ==================== -->
+        <div class="screen" id="screen-farewell">
+            <div class="farewell">
+                <div class="farewell-header">
+                    <div class="icon">📨</div>
+                    <h2>SURAT UNTUK MORA</h2>
+                </div>
+
+                <div class="letter-card">
+                    <p>Halo Mora! Maaf udah ngerjain lo disuruh main Kerning Game. Tapi ternyata game ini itu salah satu cara yang efektif untuk belajar desain. Semoga jadi motivasi ke depan untuk lo ngembangin skill desain lo ya!</p>
+
+                    <p>Mor, terimakasih banyak yaa atas bantuannya selama ini gue bertugas di KEDSOS. Aku selalu salut dengan skill desain lo. Lebih dari itu, gue juga salut sama kemauan belajar lo buat lebih dari desain, kayak ngurus website dll. Menurut gue, tambahan skill-skill di luar desain inilah yang akan bisa jadi nilai jual lo kedepannya di luar BI.</p>
+
+                    <p>Selanjutnya, gue mau minta maaf juga selama kerjasama kita setahun lebih mungkin gue ada salah kata ataupun perbuatan. Memang namanya manusia tentu tidak luput dari kesalahan dan disharmoni, tapi yang menjaga tali silaturahmi adalah memaafkan. Sekali lagi, aku juga berterima kasih atas semua kolaborasi kita ya. Menurut gue lo kayak <span class="accent">kuda hitam yang diam-diam bisa diandalkan</span>. Tapi akur-akur yaa sama Mbak Afril!</p>
+
+                    <p>Semoga Mora diberikan kesehatan, kebahagiaan, dan kesuksesan dunia dan akhirat. Semoga semua harapan dan mimpinya dapat tercapai, dan jika sudah waktunya, dapat <span class="accent">'lulus'</span> dari BI untuk diganti dengan hal yang lebih baik lagi. Amiin...</p>
+
+                    <div class="gift-box">
+                        <div class="gift-title">🎁 HADIAH KECIL</div>
+                        <div class="gift-text">
+                            Sebagai bentuk terima kasih (dan permintaan maaf),<<br>
+                            ini ada sedikit hadiah kecil buat lo.<br>
+                            Silahkan digunakan untuk dapat rileks setelah<br>
+                            berjam-jam duduk di depan komputer untuk ngedesain.
+                        </div>
+                    </div>
+
+                    <p>Akhir kata, nuhuun!</p>
+
+                    <div class="signature">— Tya</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIG ====================
+        const OPTIMAL = [1, -2, 0];      // W-A, A-V, V-E optimal kerning
+        const TOLERANCE = [3, 3, 3];     // ±3px = perfect, ±6px = ok
+        const TARGET = 70;
+
+        // ==================== STATE ====================
+        let values = [0, 0, 0];
+        let isLocked = false;
+
+        // ==================== NAVIGATION ====================
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function goToGame() {
+            showScreen('screen-game');
+            initGame();
+        }
+
+        function goToFarewell() {
+            showScreen('screen-farewell');
+            document.getElementById('screen-farewell').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==================== INIT ====================
+        function initGame() {
+            values = [0, 0, 0];
+            isLocked = false;
+
+            // Reset sliders
+            for (let i = 0; i < 3; i++) {
+                const slider = document.getElementById(`slider-${i}`);
+                const num = document.getElementById(`num-${i}`);
+                if (slider) slider.value = 0;
+                if (num) num.textContent = '0';
+            }
+
+            // Reset letters
+            for (let i = 0; i < 4; i++) {
+                const char = document.getElementById(`char-${i}`);
+                if (char) char.style.marginRight = '0px';
+            }
+
+            // Reset gap lines
+            for (let i = 0; i < 3; i++) {
+                const line = document.getElementById(`gapline-${i}`);
+                if (line) {
+                    line.className = 'gap-line';
+                    line.style.width = '100%';
+                }
+            }
+
+            // Reset feedback
+            const fb = document.getElementById('feedback');
+            fb.innerHTML = '<div>Geser slider sampai garisnya hijau!</div><div class="live-score" id="live-score"></div>';
+            fb.className = 'feedback-area neutral';
+
+            // Reset button
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = false;
+            btn.textContent = '▶ SUBMIT';
+
+            // Remove animations
+            document.getElementById('word-box').classList.remove('flash-fail');
+            document.getElementById('letters-row').classList.remove('shake');
+        }
+
+        // ==================== SLIDER ====================
+        function onSliderChange(index, value) {
+            if (isLocked) return;
+
+            const val = parseInt(value);
+            values[index] = val;
+
+            // Update number display
+            const numEl = document.getElementById(`num-${index}`);
+            if (numEl) numEl.textContent = val > 0 ? `+${val}` : `${val}`;
+
+            // Apply visual kerning
+            applyKerning();
+
+            // Update gap line color (live feedback!)
+            updateGapFeedback(index, val);
+
+            // Update live score preview
+            updateLiveScore();
+        }
+
+        function applyKerning() {
+            // W gets margin-right based on gap 0
+            const charW = document.getElementById('char-0');
+            if (charW) charW.style.marginRight = `${values[0]}px`;
+
+            // A gets margin-right based on gap 1
+            const charA = document.getElementById('char-1');
+            if (charA) charA.style.marginRight = `${values[1]}px`;
+
+            // V gets margin-right based on gap 2
+            const charV = document.getElementById('char-2');
+            if (charV) charV.style.marginRight = `${values[2]}px`;
+        }
+
+        function updateGapFeedback(index, val) {
+            const optimal = OPTIMAL[index];
+            const diff = Math.abs(val - optimal);
+            const line = document.getElementById(`gapline-${index}`);
+
+            if (!line) return;
+
+            // Color based on how close
+            if (diff <= 1) {
+                line.className = 'gap-line good'; // Green = perfect
+            } else if (diff <= 3) {
+                line.className = 'gap-line ok';   // Orange = close
+            } else {
+                line.className = 'gap-line bad';  // Red = far
+            }
+
+            // Width shows intensity (closer = thicker)
+            const intensity = Math.max(30, 100 - diff * 8);
+            line.style.width = `${intensity}%`;
+        }
+
+        function updateLiveScore() {
+            let earned = 0;
+            for (let i = 0; i < 3; i++) {
+                const diff = Math.abs(values[i] - OPTIMAL[i]);
+                let score = 0;
+                if (diff <= 1) score = 100;
+                else if (diff <= 3) score = 70;
+                else if (diff <= 5) score = 40;
+                else score = 10;
+                earned += score;
+            }
+            const preview = Math.round(earned / 3);
+            const liveEl = document.getElementById('live-score');
+            if (liveEl) {
+                liveEl.textContent = `Preview: ~${preview}%`;
+                liveEl.style.color = preview >= 70 ? '#3fb950' : preview >= 50 ? '#f0883e' : '#f85149';
+            }
+        }
+
+        // ==================== SUBMIT ====================
+        function submitGame() {
+            if (isLocked) return;
+            isLocked = true;
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            // Calculate final score
+            let earned = 0;
+            for (let i = 0; i < 3; i++) {
+                const diff = Math.abs(values[i] - OPTIMAL[i]);
+                let pairScore = 0;
+
+                if (diff <= 1) pairScore = 100;           // Perfect
+                else if (diff <= 3) pairScore = 70;       // Good
+                else if (diff <= 5) pairScore = 40;       // OK
+                else if (diff <= 7) pairScore = 20;      // Meh
+                else pairScore = 5;                       // Bad
+
+                earned += pairScore;
+            }
+
+            const score = Math.round(earned / 3);
+
+            // Final feedback
+            const fb = document.getElementById('feedback');
+            if (score >= 85) {
+                fb.innerHTML = `<div style="color:#3fb950; font-size:30px;">✨ ${score}% — Sempurna!</div>`;
+                fb.className = 'feedback-area success';
+            } else if (score >= 70) {
+                fb.innerHTML = `<div style="color:#3fb950; font-size:30px;">👍 ${score}% — Bagus!</div>`;
+                fb.className = 'feedback-area success';
+            } else if (score >= 50) {
+                fb.innerHTML = `<div style="color:#f0883e; font-size:30px;">💭 ${score}% — Hampir...</div>`;
+                fb.className = 'feedback-area fail';
+            } else {
+                fb.innerHTML = `<div style="color:#f85149; font-size:30px;">📚 ${score}% — Coba lagi</div>`;
+                fb.className = 'feedback-area fail';
+            }
+
+            setTimeout(() => showResult(score), 1500);
+        }
+
+        // ==================== RESULT ====================
+        function showResult(score) {
+            showScreen('screen-result');
+
+            const emoji = document.getElementById('res-emoji');
+            const title = document.getElementById('res-title');
+            const scoreEl = document.getElementById('res-score');
+            const msg = document.getElementById('res-msg');
+            const countdown = document.getElementById('countdown');
+            const unlockBtn = document.getElementById('btn-unlock');
+
+            scoreEl.textContent = `${score}%`;
+
+            if (score >= TARGET) {
+                // SUCCESS
+                emoji.textContent = '🎉';
+                title.textContent = 'SURAT TERBUKA!';
+                title.style.color = '#3fb950';
+                msg.innerHTML = `Skor <span style="color:#ffd700;">${score}%</span> memenuhi target.<br>Selamat! Surat perpisahan sudah bisa dibaca.`;
+                countdown.textContent = '';
+                unlockBtn.classList.add('show');
+
+            } else {
+                // FAIL — AUTO REPLAY
+                emoji.textContent = '💪';
+                title.textContent = 'BELUM CUKUP...';
+                title.style.color = '#f85149';
+                msg.innerHTML = `Skor <span style="color:#f85149;">${score}%</span>, targetnya ${TARGET}%.<<br>Ayo coba sekali lagi!`;
+
+                let sec = 3;
+                countdown.innerHTML = `Otomatis mencoba lagi dalam <span>${sec}</span>...`;
+
+                const timer = setInterval(() => {
+                    sec--;
+                    if (sec > 0) {
+                        countdown.innerHTML = `Otomatis mencoba lagi dalam <span>${sec}</span>...`;
+                    } else {
+                        clearInterval(timer);
+                        autoReplay();
+                    }
+                }, 1000);
+
+                unlockBtn.classList.remove('show');
+            }
+        }
+
+        // ==================== AUTO REPLAY ====================
+        function autoReplay() {
+            showScreen('screen-game');
+
+            // Flash red border
+            const wordBox = document.getElementById('word-box');
+            wordBox.classList.add('flash-fail');
+            setTimeout(() => wordBox.classList.remove('flash-fail'), 1200);
+
+            // Shake letters
+            const letters = document.getElementById('letters-row');
+            letters.classList.add('shake');
+            setTimeout(() => letters.classList.remove('shake'), 500);
+
+            initGame();
+        }
+
+        // ==================== RESET ====================
+        function resetGame() {
+            if (isLocked) return;
+            initGame();
+        }
+    </script>
+</body>
+</html>
