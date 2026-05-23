@@ -1,416 +1,476 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sebuah Surat — Untuk Mora</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --paper:#F5F1E8;
-    --paper-2:#FAF8F2;
-    --ink:#0F1B2E;
-    --ink-soft:#475569;
-    --muted:#8B9DAE;
-    --line:#D4CFC3;
-    --accent:#1E3A5F;
-    --accent-soft:#D6E4F0;
-    --sage:#5A7D5A;
-    --sage-soft:#D8E4D4;
-    --shadow:0 24px 60px -28px rgba(15,27,46,.35);
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Letter — Kerning Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  *{margin:0;padding:0;box-sizing:border-box;}
+        body {
+            background: #0d1117;
+            font-family: 'VT323', monospace;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  html,body{background:var(--paper);}
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
 
-  body{
-    font-family:'Hanken Grotesk',-apple-system,sans-serif;
-    color:var(--ink);
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    padding:32px 20px 64px;
-    -webkit-font-smoothing:antialiased;
-    background:
-      radial-gradient(900px 500px at 80% -8%, rgba(30,58,95,.06), transparent 70%),
-      var(--paper);
-  }
+        /* ===== SCREENS ===== */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
 
-  .container{width:100%;max-width:620px;}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-  /* ---------- SCREENS ---------- */
-  .screen{display:none;}
-  .screen.active{display:block;animation:rise .55s cubic-bezier(.2,.7,.2,1);}
-  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+        /* ===== SPLASH ===== */
+        .splash { text-align: center; padding: 60px 20px; }
+        .splash-emoji { font-size: 72px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        .splash h1 { font-size: 52px; color: #58a6ff; font-weight: normal; margin-bottom: 10px; text-shadow: 0 0 20px rgba(88,166,255,0.2); }
+        .splash p { font-size: 24px; color: #8b949e; margin-bottom: 40px; }
+        .locked-box {
+            background: #161b22; border: 2px solid #30363d; border-radius: 14px;
+            padding: 30px; margin: 30px auto; max-width: 420px;
+        }
+        .locked-box .lock { font-size: 40px; margin-bottom: 15px; }
+        .locked-box p { font-size: 22px; color: #8b949e; line-height: 1.6; margin: 0; }
+        .locked-box .accent { color: #f0883e; }
+        .start-btn {
+            font-family: 'VT323', monospace; font-size: 28px; padding: 16px 48px;
+            background: #238636; color: #fff; border: none; border-radius: 10px;
+            cursor: pointer; margin-top: 35px; letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+        .start-btn:hover { background: #2ea043; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(35,134,54,0.35); }
 
-  .stagger > *{opacity:0;animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
-  .stagger > *:nth-child(1){animation-delay:.05s;}
-  .stagger > *:nth-child(2){animation-delay:.14s;}
-  .stagger > *:nth-child(3){animation-delay:.23s;}
-  .stagger > *:nth-child(4){animation-delay:.32s;}
-  .stagger > *:nth-child(5){animation-delay:.41s;}
+        /* ===== GAME ===== */
+        .game { padding: 20px 10px; }
+        .game-header { text-align: center; margin-bottom: 25px; }
+        .game-header h2 { font-size: 40px; color: #58a6ff; font-weight: normal; margin-bottom: 6px; }
+        .game-header .sub { font-size: 22px; color: #8b949e; }
 
-  /* ---------- SHARED TYPE ---------- */
-  .kicker{
-    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
-    color:var(--muted);font-weight:600;
-  }
-  .display{
-    font-family:'Fraunces',serif;font-weight:380;
-    font-optical-sizing:auto;line-height:1.02;letter-spacing:-.01em;
-  }
+        .target-bar {
+            display: flex; justify-content: center; gap: 10px;
+            margin-bottom: 25px;
+        }
+        .target-pill {
+            background: #161b22; border: 2px solid #30363d; border-radius: 10px;
+            padding: 10px 24px; font-size: 22px; display: flex; align-items: center; gap: 10px;
+        }
+        .target-pill .label { color: #8b949e; }
+        .target-pill .value { color: #f0883e; font-size: 26px; }
 
-  /* ---------- INTRO ---------- */
-  .intro{padding:28px 4px;}
-  .intro .kicker{margin-bottom:18px;}
-  .intro h1{
-    font-family:'Fraunces',serif;font-weight:360;
-    font-size:clamp(2.9rem,11vw,4.4rem);line-height:.98;
-    letter-spacing:-.02em;margin-bottom:18px;
-  }
-  .intro h1 em{font-style:italic;color:var(--accent);}
-  .intro .lede{
-    font-size:18px;line-height:1.6;color:var(--ink-soft);
-    max-width:440px;margin-bottom:34px;
-  }
+        /* WORD DISPLAY — CLEAR & SPACED */
+        .word-box {
+            background: #161b22; border: 2px solid #30363d; border-radius: 16px;
+            padding: 40px 20px 30px; margin: 20px 0; text-align: center;
+        }
 
-  .lesson{
-    background:var(--paper-2);border:1px solid var(--line);
-    border-radius:18px;padding:28px;margin-bottom:30px;
-  }
-  .lesson-head{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;}
-  .lesson-head .no{
-    font-family:'Fraunces',serif;font-style:italic;font-size:20px;color:var(--accent);
-  }
-  .lesson-head h2{font-family:'Fraunces',serif;font-weight:420;font-size:23px;}
-  .lesson p{font-size:15.5px;line-height:1.62;color:var(--ink-soft);margin-bottom:22px;}
+        .letters-row {
+            display: flex; justify-content: center; align-items: baseline;
+            gap: 4px; min-height: 100px; margin-bottom: 30px;
+        }
 
-  .demo{
-    display:grid;grid-template-columns:1fr 1fr;gap:14px;
-  }
-  .demo-cell{
-    background:var(--paper);border:1px solid var(--line);
-    border-radius:12px;padding:20px 14px 14px;text-align:center;
-  }
-  .demo-cell.good{border-color:var(--sage);background:var(--sage-soft);}
-  .demo-word{
-    font-family:'Fraunces',serif;font-weight:420;font-size:clamp(2rem,9vw,2.7rem);
-    line-height:1;margin-bottom:14px;display:flex;justify-content:center;
-  }
-  .demo-tag{
-    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-    font-weight:700;color:var(--muted);
-  }
-  .demo-cell.good .demo-tag{color:var(--sage);}
-  .loose span:not(:last-child){margin-right:7px;}
-  .tight span+span{margin-left:-3px;}
-  .tight .k1{margin-left:-7px;}
-  .tight .k2{margin-left:-6px;}
+        .letter-item {
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+        }
 
-  /* ---------- BUTTONS ---------- */
-  .btn{
-    font-family:'Hanken Grotesk',sans-serif;font-size:15px;font-weight:600;
-    letter-spacing:.02em;padding:15px 32px;border:none;border-radius:999px;
-    cursor:pointer;transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
-  }
-  .btn-primary{background:var(--ink);color:var(--paper-2);}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(28,25,22,.6);}
-  .btn-primary:disabled{background:#B8C0CC;cursor:not-allowed;transform:none;box-shadow:none;}
-  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
-  .btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
-  .btn-accent{background:var(--accent);color:#fff;}
-  .btn-accent:hover{transform:translateY(-2px);box-shadow:0 14px 30px -12px rgba(207,74,44,.7);}
+        .letter-char {
+            font-size: 80px; line-height: 1; color: #e6edf3;
+            transition: all 0.2s; min-width: 50px; text-align: center;
+        }
 
-  /* ---------- GAME ---------- */
-  .game{padding:22px 4px;}
-  .game-top{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    margin-bottom:6px;
-  }
-  .round-no{font-family:'Fraunces',serif;font-size:15px;color:var(--ink-soft);}
-  .round-no b{color:var(--accent);font-style:italic;font-weight:500;}
-  .target-tag{
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--muted);font-weight:700;
-  }
-  .progress{display:flex;gap:6px;margin:14px 0 26px;}
-  .progress span{
-    height:3px;flex:1;background:var(--line);border-radius:2px;
-    transition:background .3s ease;
-  }
-  .progress span.done{background:var(--sage);}
-  .progress span.now{background:var(--accent);}
+        /* Gap indicator between letters */
+        .gap-box {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-end; padding-bottom: 8px;
+            min-width: 60px;
+        }
 
-  .stage{
-    background:var(--paper-2);border:1px solid var(--line);
-    border-radius:20px;padding:42px 22px 30px;text-align:center;
-  }
-  .stage-label{
-    font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--muted);font-weight:700;margin-bottom:24px;
-  }
-  .word{
-    display:flex;justify-content:center;align-items:baseline;
-    min-height:118px;margin-bottom:8px;
-  }
-  .word .ch{
-    font-family:'Fraunces',serif;font-weight:400;
-    font-size:clamp(3.6rem,17vw,7rem);line-height:1;color:var(--ink);
-    transition:margin .12s ease;
-  }
+        .gap-line {
+            width: 100%; height: 3px; background: #30363d;
+            border-radius: 2px; margin-bottom: 8px;
+            transition: all 0.2s;
+        }
 
-  .gaps{
-    display:flex;justify-content:center;gap:14px;
-    margin:18px 0 30px;flex-wrap:wrap;
-  }
-  .pair{display:flex;flex-direction:column;align-items:center;gap:10px;width:158px;}
-  .pair-label{
-    font-family:'Fraunces',serif;font-size:18px;color:var(--ink-soft);
-    letter-spacing:.04em;
-  }
-  .pair-label .sep{color:var(--muted);margin:0 4px;}
-  .slider{
-    -webkit-appearance:none;appearance:none;width:100%;height:4px;
-    background:var(--line);border-radius:4px;outline:none;cursor:pointer;
-  }
-  .slider::-webkit-slider-thumb{
-    -webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;
-    background:var(--paper-2);border:2px solid var(--ink);cursor:pointer;
-    box-shadow:0 2px 8px rgba(28,25,22,.25);transition:transform .12s ease, border-color .15s ease;
-  }
-  .slider::-webkit-slider-thumb:hover{transform:scale(1.12);}
-  .slider::-moz-range-thumb{
-    width:24px;height:24px;border-radius:50%;
-    background:var(--paper-2);border:2px solid var(--ink);cursor:pointer;
-  }
-  .pair.hot .slider::-webkit-slider-thumb{border-color:var(--accent);}
-  .pair.locked-in .slider::-webkit-slider-thumb{border-color:var(--sage);}
-  .readout{
-    display:flex;align-items:center;gap:7px;font-size:13px;
-  }
-  .readout .val{
-    font-family:'Fraunces',serif;font-size:17px;font-weight:500;
-    min-width:34px;color:var(--ink-soft);
-  }
-  .readout .dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s;}
-  .readout.near .dot{background:var(--accent);}
-  .readout.good .dot{background:var(--sage);}
-  .readout.good .val{color:var(--sage);}
+        .gap-line.good { background: #3fb950; box-shadow: 0 0 8px rgba(63,185,80,0.4); }
+        .gap-line.ok { background: #f0883e; }
+        .gap-line.bad { background: #f85149; }
 
-  .hint{
-    font-size:14px;line-height:1.55;color:var(--ink-soft);
-    border-left:2px solid var(--accent);padding:4px 0 4px 16px;
-    margin:22px 2px;text-align:left;
-  }
-  .hint b{color:var(--ink);}
+        .gap-label {
+            font-size: 16px; color: #6e7681;
+        }
 
-  .feedback{
-    min-height:30px;text-align:center;font-size:15px;
-    color:var(--ink-soft);margin:8px 0 4px;font-weight:500;
-  }
-  .feedback .pct{font-family:'Fraunces',serif;font-style:italic;}
-  .feedback.good{color:var(--sage);}
-  .feedback.bad{color:var(--accent);}
+        /* SLIDERS — ONE PER GAP */
+        .sliders-area {
+            display: flex; justify-content: center; align-items: flex-start;
+            gap: 10px; padding: 15px 10px;
+        }
 
-  .controls{display:flex;justify-content:center;gap:12px;margin-top:18px;}
+        .slider-block {
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 80px;
+        }
 
-  .shake{animation:shake .42s ease;}
-  @keyframes shake{
-    0%,100%{transform:translateX(0);}
-    25%{transform:translateX(-7px);}
-    75%{transform:translateX(7px);}
-  }
+        .slider-pair-label {
+            font-size: 18px; color: #8b949e; margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
 
-  /* ---------- RESULT ---------- */
-  .result{padding:48px 8px;text-align:center;}
-  .result .kicker{margin-bottom:20px;}
-  .result h2{
-    font-family:'Fraunces',serif;font-weight:360;
-    font-size:clamp(2.4rem,9vw,3.4rem);letter-spacing:-.02em;margin-bottom:10px;
-  }
-  .big-score{
-    font-family:'Fraunces',serif;font-weight:340;
-    font-size:clamp(4.6rem,22vw,7.4rem);line-height:1;color:var(--accent);
-    margin:18px 0 6px;
-  }
-  .big-score .pc{font-size:.4em;color:var(--muted);vertical-align:.55em;}
-  .result-msg{
-    font-size:16px;line-height:1.6;color:var(--ink-soft);
-    max-width:400px;margin:6px auto 30px;
-  }
-  .round-recap{
-    display:flex;justify-content:center;gap:10px;margin:0 auto 36px;
-    flex-wrap:wrap;
-  }
-  .recap-chip{
-    background:var(--paper-2);border:1px solid var(--line);border-radius:12px;
-    padding:12px 18px;min-width:96px;
-  }
-  .recap-chip .w{
-    font-family:'Fraunces',serif;font-size:15px;letter-spacing:.06em;color:var(--ink-soft);
-  }
-  .recap-chip .s{
-    font-family:'Fraunces',serif;font-size:24px;font-weight:500;color:var(--sage);margin-top:2px;
-  }
+        .slider-wrap {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px;
+        }
 
-  /* ---------- LETTER ---------- */
-  .letter-wrap{padding:14px 2px;}
-  .letter-head{margin-bottom:24px;}
-  .letter-head .kicker{margin-bottom:14px;}
-  .letter-head h2{
-    font-family:'Fraunces',serif;font-weight:350;
-    font-size:clamp(2.4rem,9vw,3.3rem);letter-spacing:-.02em;line-height:1.04;
-  }
-  .letter-head h2 em{font-style:italic;color:var(--accent);}
-  .letter{
-    background:var(--paper-2);border:1px solid var(--line);
-    border-radius:20px;padding:clamp(28px,6vw,46px);
-    box-shadow:var(--shadow);position:relative;
-  }
-  .letter::before{
-    content:"";position:absolute;left:clamp(28px,6vw,46px);right:clamp(28px,6vw,46px);
-    top:0;height:3px;background:var(--accent);border-radius:0 0 3px 3px;
-  }
-  .letter p{
-    font-size:16.5px;line-height:1.72;color:var(--ink);margin-bottom:18px;
-  }
-  .letter p:first-of-type::first-letter{
-    font-family:'Fraunces',serif;font-size:3.1em;line-height:.8;
-    float:left;margin:6px 10px 0 0;color:var(--accent);font-weight:400;
-  }
-  .letter .accent{color:var(--accent);font-style:italic;}
-  .gift{
-    border:1px dashed var(--accent);border-radius:14px;
-    padding:24px;margin:26px 0;text-align:center;background:rgba(30,58,95,.04);
-  }
-  .gift .gift-kicker{
-    font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--accent);font-weight:700;margin-bottom:10px;
-  }
-  .gift .gift-title{
-    font-family:'Fraunces',serif;font-size:22px;font-weight:450;margin-bottom:10px;
-  }
-  .gift .gift-text{font-size:15px;line-height:1.62;color:var(--ink-soft);}
-  .sign{
-    text-align:right;margin-top:30px;padding-top:20px;
-    border-top:1px solid var(--line);
-  }
-  .sign .from{font-size:13px;color:var(--muted);letter-spacing:.04em;}
-  .sign .name{
-    font-family:'Fraunces',serif;font-style:italic;font-size:30px;
-    color:var(--ink);margin-top:2px;
-  }
+        .slider-track {
+            width: 60px; height: 140px;
+            -webkit-appearance: none; appearance: none;
+            background: #21262d; border-radius: 8px; outline: none;
+            border: 2px solid #30363d; cursor: pointer;
+            writing-mode: bt-lr; /* vertical */
+            -webkit-appearance: slider-vertical;
+        }
 
-  @media (max-width:520px){
-    body{padding:20px 14px 48px;}
-    .stage{padding:34px 14px 24px;}
-    .pair{width:46%;}
-    .lesson,.letter{padding:24px;}
-  }
-</style>
+        /* For browsers that don't support vertical slider natively */
+        .slider-vertical {
+            transform: rotate(-90deg);
+            width: 140px; height: 60px;
+            margin: 40px 0;
+        }
+
+        .slider-track::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 44px; height: 44px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 12px rgba(88,166,255,0.4);
+            transition: transform 0.1s;
+        }
+
+        .slider-track::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(88,166,255,0.6);
+        }
+
+        .slider-track::-moz-range-thumb {
+            width: 44px; height: 44px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+        }
+
+        .slider-num {
+            font-size: 28px; color: #f0883e; font-weight: bold;
+            min-width: 50px; text-align: center; margin-top: 8px;
+        }
+
+        /* Horizontal slider fallback for mobile */
+        .slider-h {
+            width: 100%; max-width: 200px; height: 16px;
+            -webkit-appearance: none; appearance: none;
+            background: #21262d; border-radius: 8px; outline: none;
+            border: 2px solid #30363d; cursor: pointer;
+        }
+
+        .slider-h::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 40px; height: 40px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 12px rgba(88,166,255,0.4);
+        }
+
+        .slider-h::-moz-range-thumb {
+            width: 40px; height: 40px;
+            background: #58a6ff; border: 3px solid #e6edf3;
+            border-radius: 50%; cursor: pointer;
+        }
+
+        /* Hint */
+        .hint-box {
+            background: #0d1117; border-left: 4px solid #58a6ff;
+            padding: 15px 20px; margin: 20px 0;
+            font-size: 20px; color: #8b949e; line-height: 1.5;
+        }
+
+        .hint-box .tip { color: #58a6ff; }
+
+        /* Feedback */
+        .feedback-area {
+            min-height: 60px; margin: 20px 0;
+            font-size: 26px; text-align: center;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 5px;
+        }
+
+        .feedback-area.success { color: #3fb950; }
+        .feedback-area.fail { color: #f85149; }
+        .feedback-area.neutral { color: #8b949e; }
+
+        /* Score preview during play */
+        .live-score {
+            font-size: 18px; color: #6e7681; margin-top: 5px;
+        }
+
+        /* Buttons */
+        .btn-row { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
+
+        .btn {
+            font-family: 'VT323', monospace; font-size: 24px;
+            padding: 14px 36px; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-submit {
+            background: #238636; color: #fff;
+        }
+        .btn-submit:hover { background: #2ea043; box-shadow: 0 4px 16px rgba(35,134,54,0.35); }
+        .btn-submit:disabled {
+            background: #21262d; color: #484f58; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
+
+        .btn-reset {
+            background: #21262d; color: #8b949e;
+            border: 2px solid #30363d;
+        }
+        .btn-reset:hover { background: #30363d; color: #c9d1d9; }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.5s ease-in-out; }
+
+        @keyframes flash-red {
+            0%, 100% { border-color: #30363d; }
+            25%, 75% { border-color: #f85149; }
+            50% { border-color: #da3633; }
+        }
+        .flash-fail { animation: flash-red 0.6s ease-in-out 2; }
+
+        /* ===== RESULT ===== */
+        .result { text-align: center; padding: 60px 20px; }
+        .result-emoji { font-size: 64px; margin-bottom: 20px; }
+        .result h2 { font-size: 44px; font-weight: normal; margin-bottom: 12px; }
+        .result-score { font-size: 60px; color: #ffd700; margin: 15px 0; text-shadow: 0 0 25px rgba(255,215,0,0.25); }
+        .result-msg { font-size: 24px; color: #8b949e; max-width: 440px; margin: 15px auto; line-height: 1.5; }
+        .countdown { font-size: 22px; color: #8b949e; margin-top: 20px; }
+        .countdown span { color: #f0883e; font-size: 30px; }
+
+        .btn-unlock {
+            display: none; font-family: 'VT323', monospace; font-size: 28px;
+            padding: 18px 48px; background: #ffd700; color: #0d1117;
+            border: none; border-radius: 12px; cursor: pointer;
+            margin-top: 35px; font-weight: bold; letter-spacing: 2px;
+            animation: pulse-gold 1.5s infinite;
+        }
+        .btn-unlock.show { display: inline-block; }
+        .btn-unlock:hover { transform: scale(1.05); }
+
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.35); }
+            50% { box-shadow: 0 0 25px 10px rgba(255,215,0,0.15); }
+        }
+
+        /* ===== FAREWELL ===== */
+        .farewell { padding: 20px 10px; }
+        .farewell-header { text-align: center; margin-bottom: 25px; }
+        .farewell-header .icon { font-size: 56px; margin-bottom: 10px; }
+        .farewell-header h2 { font-size: 40px; color: #58a6ff; font-weight: normal; }
+
+        .letter-card {
+            background: #161b22; border: 2px solid #30363d; border-radius: 16px;
+            padding: 35px; font-size: 22px; line-height: 1.65; color: #c9d1d9;
+        }
+        .letter-card p { margin-bottom: 18px; }
+        .letter-card .accent { color: #f0883e; }
+
+        .gift-box {
+            background: #0d1117; border: 2px solid #f0883e; border-radius: 12px;
+            padding: 28px; margin: 28px 0; text-align: center;
+        }
+        .gift-title { font-size: 28px; color: #ffd700; margin-bottom: 12px; }
+        .gift-text { font-size: 20px; color: #8b949e; line-height: 1.6; }
+
+        .signature { text-align: right; margin-top: 35px; color: #58a6ff; font-size: 26px; }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .splash h1 { font-size: 38px; }
+            .letter-char { font-size: 56px; }
+            .game-header h2 { font-size: 32px; }
+            .btn { font-size: 20px; padding: 12px 24px; }
+            .sliders-area { gap: 5px; }
+            .slider-block { min-width: 60px; }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- ============ INTRO ============ -->
-  <section class="screen active" id="screen-intro">
-    <div class="intro stagger">
-      <div class="kicker">Sebuah surat &nbsp;·&nbsp; masih terkunci</div>
-      <h1>Untuk <em>Mora</em></h1>
-      <p class="lede">
-        Ada surat kecil yang menunggu untuk dibaca. Tapi sebelum itu —
-        sebagai desainer tim, kamu harus melewati <strong>3 babak tantangan kerning</strong> dulu.
-        Anggap ini pemanasan. 😉
-      </p>
+    <div class="container">
+        <!-- ==================== SPLASH ==================== -->
+        <div class="screen active" id="screen-splash">
+            <div class="splash">
+                <div class="splash-emoji">📬</div>
+                <h1>SURAT TERKUNCI</h1>
+                <p>Ada sesuatu yang menunggu untuk dibuka...</p>
 
-      <div class="lesson">
-        <div class="lesson-head">
-          <span class="no">01</span>
-          <h2>Apa itu kerning?</h2>
-        </div>
-        <p>
-          Kerning adalah seni mengatur jarak antar <em>dua huruf</em> supaya terlihat
-          seimbang. Bukan soal jarak yang sama persis — tapi jarak yang <em>terasa</em> rata
-          di mata. Pasangan huruf seperti <strong>T·Y</strong> atau <strong>L·A</strong>
-          sering menyisakan "lubang" yang perlu dirapatkan.
-        </p>
-        <div class="demo">
-          <div class="demo-cell">
-            <div class="demo-word loose">
-              <span>T</span><span>Y</span><span>P</span><span>E</span>
+                <div class="locked-box">
+                    <div class="lock">🔐</div>
+                    <p>
+                        Surat ini bisa dibuka dengan<br>
+                        menyelesaikan <span class="accent">1 tantangan kerning</span>.<<br><br>
+                        Atur jarak huruf sampai terlihat pas.<br>
+                        Target: <span class="accent">skor ≥ 70%</span>
+                    </p>
+                </div>
+
+                <button class="start-btn" onclick="goToGame()">▶ BUKA KUNCI</button>
             </div>
-            <div class="demo-tag">✗ &nbsp;Spasi seragam</div>
-          </div>
-          <div class="demo-cell good">
-            <div class="demo-word tight">
-              <span>T</span><span class="k1">Y</span><span class="k2">P</span><span>E</span>
-            </div>
-            <div class="demo-tag">✓ &nbsp;Setelah dikerning</div>
-          </div>
         </div>
-      </div>
 
-      <button class="btn btn-primary" onclick="startGame()">Mulai tantangan →</button>
-    </div>
-  </section>
+        <!-- ==================== GAME ==================== -->
+        <div class="screen" id="screen-game">
+            <div class="game">
+                <div class="game-header">
+                    <h2>KERNING CHALLENGE</h2>
+                    <p class="sub">Atur jarak antar huruf</p>
+                </div>
 
-  <!-- ============ GAME ============ -->
-  <section class="screen" id="screen-game">
-    <div class="game">
-      <div class="game-top">
-        <div class="round-no">Babak <b id="round-current">01</b> dari 03</div>
-        <div class="target-tag">Target · 70%</div>
-      </div>
-      <div class="progress" id="progress">
-        <span></span><span></span><span></span>
-      </div>
+                <div class="target-bar">
+                    <div class="target-pill">
+                        <span class="label">TARGET:</span>
+                        <span class="value">≥ 70%</span>
+                    </div>
+                </div>
 
-      <div class="stage" id="stage">
-        <div class="stage-label" id="stage-label">Rapatkan jarak hurufnya</div>
-        <div class="word" id="word"></div>
-      </div>
+                <!-- LETTERS DISPLAY -->
+                <div class="word-box" id="word-box">
+                    <div class="letters-row" id="letters-row">
+                        <!-- W -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-0">W</div>
+                        </div>
+                        <!-- Gap 0: W-A -->
+                        <div class="gap-box" id="gap-0">
+                            <div class="gap-line" id="gapline-0"></div>
+                            <div class="gap-label">W-A</div>
+                        </div>
+                        <!-- A -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-1">A</div>
+                        </div>
+                        <!-- Gap 1: A-V -->
+                        <div class="gap-box" id="gap-1">
+                            <div class="gap-line" id="gapline-1"></div>
+                            <div class="gap-label">A-V</div>
+                        </div>
+                        <!-- V -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-2">V</div>
+                        </div>
+                        <!-- Gap 2: V-E -->
+                        <div class="gap-box" id="gap-2">
+                            <div class="gap-line" id="gapline-2"></div>
+                            <div class="gap-label">V-E</div>
+                        </div>
+                        <!-- E -->
+                        <div class="letter-item">
+                            <div class="letter-char" id="char-3">E</div>
+                        </div>
+                    </div>
 
-      <div class="gaps" id="gaps"></div>
+                    <!-- SLIDERS -->
+                    <div class="sliders-area" id="sliders-area">
+                        <!-- Slider for W-A -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">W ↔ A</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(0, this.value)" id="slider-0">
+                                <div class="slider-num" id="num-0">0</div>
+                            </div>
+                        </div>
+                        <!-- Slider for A-V -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">A ↔ V</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(1, this.value)" id="slider-1">
+                                <div class="slider-num" id="num-1">0</div>
+                            </div>
+                        </div>
+                        <!-- Slider for V-E -->
+                        <div class="slider-block">
+                            <div class="slider-pair-label">V ↔ E</div>
+                            <div class="slider-wrap">
+                                <input type="range" class="slider-h" min="-8" max="8" value="0"
+                                    oninput="onSliderChange(2, this.value)" id="slider-2">
+                                <div class="slider-num" id="num-2">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-      <p class="hint">
-        Geser ke <b>kiri</b> untuk merapatkan, ke <b>kanan</b> untuk merenggangkan.
-        Titik di bawah slider jadi <b style="color:var(--sage)">hijau</b> kalau sudah pas.
-      </p>
+                <div class="hint-box">
+                    <span class="tip">💡 TIPS:</span> Geser slider ke <b>kiri</b> untuk rapatkan, ke <b>kanan</b> untuk renggangkan. Garis di atas akan berubah warna: <span style="color:#3fb950;">hijau</span> = pas, <span style="color:#f0883e;">oren</span> = hampir, <span style="color:#f85149;">merah</span> = jauh!
+                </div>
 
-      <div class="feedback" id="feedback">Atur ketiga pasangan huruf di atas.</div>
+                <div class="feedback-area neutral" id="feedback">
+                    <div>Geser slider sampai garisnya hijau!</div>
+                    <div class="live-score" id="live-score"></div>
+                </div>
 
-      <div class="controls">
-        <button class="btn btn-primary" id="btn-submit" onclick="submitRound()">Periksa</button>
-        <button class="btn btn-ghost" id="btn-reset" onclick="resetRound()">Atur ulang</button>
-      </div>
-    </div>
-  </section>
+                <div class="btn-row">
+                    <button class="btn btn-submit" id="btn-submit" onclick="submitGame()">▶ SUBMIT</button>
+                    <button class="btn btn-reset" onclick="resetGame()">↺ RESET</button>
+                </div>
+            </div>
+        </div>
 
-  <!-- ============ RESULT ============ -->
-  <section class="screen" id="screen-result">
-    <div class="result">
-      <div class="kicker">Tantangan selesai</div>
-      <h2>Mata desainermu terbukti</h2>
-      <div class="big-score"><span id="final-num">0</span><span class="pc">%</span></div>
-      <p class="result-msg" id="result-msg"></p>
-      <div class="round-recap" id="round-recap"></div>
-      <button class="btn btn-accent" onclick="openLetter()">Buka suratnya →</button>
-    </div>
-  </section>
+        <!-- ==================== RESULT ==================== -->
+        <div class="screen" id="screen-result">
+            <div class="result">
+                <div class="result-emoji" id="res-emoji">🎯</div>
+                <h2 id="res-title">HASIL</h2>
+                <div class="result-score" id="res-score">0%</div>
+                <p class="result-msg" id="res-msg"></p>
+                <p class="countdown" id="countdown"></p>
 
-  <!-- ============ LETTER ============ -->
-  <section class="screen" id="screen-letter">
-    <div class="letter-wrap stagger">
-      <div class="letter-head">
-        <div class="kicker">Surat terbuka &nbsp;·&nbsp; akhirnya</div>
-        <h2>Sebuah pesan, <em>untuk Mora</em></h2>
-      </div>
+                <button class="btn-unlock" id="btn-unlock" onclick="goToFarewell()">📬 BUKA SURAT</button>
+            </div>
+        </div>
 
-      <div class="letter">
-        <p>Halo Mora! Maaf udah ngerjain lo disuruh main Kerning Game. Anggap ini gimmick terakhir dari gue yaa hehe</p>
+        <!-- ==================== FAREWELL ==================== -->
+        <div class="screen" id="screen-farewell">
+            <div class="farewell">
+                <div class="farewell-header">
+                    <div class="icon">📨</div>
+                    <h2>SURAT UNTUK MORA</h2>
+                </div>
+
+                <div class="letter-card">
+                     <p>Halo Mora! Maaf udah ngerjain lo disuruh main Kerning Game. Anggap ini gimmick terakhir dari gue yaa hehe</p>
 
         <p>Mor, terimakasih banyak yaa atas bantuannya selama ini gue bertugas di KEDSOS. Terimakasih atas semua dedikasi dan malam-malam ngedit mendadak disko yang lo bisa tuntaskan. Sebagai orang tupoksi komunikasi, Gue selalu salut dengan skill desain lo yang setara dari vendor hehe. Lebih dari itu, gue juga salut sama kemauan belajar lo buat lebih dari desain, kayak ngurus website, stand edukasi, dll. Menurut gue lo kayak <span class="accent">kuda hitam yang diam-diam bisa diandalkan</span> Gue harap, skill-skill di luar desain inilah yang akan bisa jadi nilai jual lo kedepannya di luar BI.</p>
 
@@ -418,237 +478,281 @@
 
         <p>Semoga Mora diberikan kesehatan, kebahagiaan, dan kesuksesan dunia dan akhirat. Semoga semua harapan dan mimpinya dapat tercapai, dan jika sudah waktunya, dapat <span class="accent">'lulus'</span> dari BI untuk diganti dengan hal yang lebih baik lagi. Amiin...</p>
 
-        <div class="gift">
-          <div class="gift-kicker">Hadiah Kecil</div>
-          <div class="gift-title">🎁 Sedikit tanda terima kasih</div>
-          <div class="gift-text">
-            Sebagai bentuk terima kasih (dan permintaan maaf), ini ada sedikit hadiah kecil
-            buat lo. Silahkan digunakan untuk dapat rileks setelah berjam-jam duduk di depan
-            komputer untuk ngedesain.
-          </div>
-        </div>
+                    <div class="gift-box">
+                        <div class="gift-title">🎁 HADIAH KECIL</div>
+                        <div class="gift-text">
+                            Sebagai bentuk terima kasih (dan permintaan maaf),<<br>
+                            ini ada sedikit hadiah kecil buat lo.<br>
+                            Silahkan digunakan untuk dapat rileks setelah<br>
+                            berjam-jam duduk di depan komputer untuk ngedesain.
+                        </div>
+                    </div>
 
-        <p>Akhir kata, nuhuun!</p>
+                    <p>Akhir kata, nuhuun!</p>
 
-        <div class="sign">
-          <div class="from">Dengan hangat,</div>
-          <div class="name">Tya</div>
+                    <div class="signature">— Tya</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </section>
 
-</div>
+    <script>
+        // ==================== CONFIG ====================
+        const OPTIMAL = [1, -2, 0];      // W-A, A-V, V-E optimal kerning
+        const TOLERANCE = [3, 3, 3];     // ±3px = perfect, ±6px = ok
+        const TARGET = 70;
 
-<script>
-  /* ============ KONFIGURASI ============ */
-  const ROUNDS = [
-    { word:'WAVE', letters:['W','A','V','E'], optimal:[-4,-5,-2] },
-    { word:'LATO', letters:['L','A','T','O'], optimal:[-6,-5,-2] },
-    { word:'TYPE', letters:['T','Y','P','E'], optimal:[-5,-4,-1] }
-  ];
-  const RANGE = 12;       // slider -12..12
-  const TARGET = 70;      // skor lulus per babak
-  const SCALE = 1.35;     // pengali agar pergeseran lebih terlihat
+        // ==================== STATE ====================
+        let values = [0, 0, 0];
+        let isLocked = false;
 
-  /* ============ STATE ============ */
-  let roundIndex = 0;
-  let values = [0,0,0];
-  let locked = false;
-  let roundScores = [];
-
-  /* ============ NAVIGASI ============ */
-  function showScreen(id){
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-  function startGame(){
-    roundIndex = 0; roundScores = [];
-    showScreen('screen-game');
-    initRound();
-  }
-  function openLetter(){ showScreen('screen-letter'); }
-
-  /* ============ SETUP BABAK ============ */
-  function initRound(){
-    const r = ROUNDS[roundIndex];
-    values = [0,0,0];
-    locked = false;
-
-    document.getElementById('round-current').textContent =
-      String(roundIndex+1).padStart(2,'0');
-
-    // progress bar
-    const bars = document.querySelectorAll('#progress span');
-    bars.forEach((b,i)=>{
-      b.className = i < roundIndex ? 'done' : (i === roundIndex ? 'now' : '');
-    });
-
-    // huruf
-    const word = document.getElementById('word');
-    word.innerHTML = '';
-    r.letters.forEach((ch,i)=>{
-      const el = document.createElement('span');
-      el.className = 'ch';
-      el.id = 'ch-'+i;
-      el.textContent = ch;
-      word.appendChild(el);
-    });
-
-    // pasangan huruf + slider
-    const gaps = document.getElementById('gaps');
-    gaps.innerHTML = '';
-    for(let i=0;i<<3;i++){
-      const pair = document.createElement('div');
-      pair.className = 'pair';
-      pair.id = 'pair-'+i;
-      pair.innerHTML = `
-        <div class="pair-label">${r.letters[i]}<<span class="sep">·</span>${r.letters[i+1]}</div>
-        <input type="range" class="slider" min="${-RANGE}" max="${RANGE}" value="0"
-               oninput="onSlide(${i}, this.value)" id="slider-${i}">
-        <div class="readout" id="readout-${i}">
-          <span class="dot"></span><span class="val">0</span>
-        </div>`;
-      gaps.appendChild(pair);
-    }
-
-    // feedback + tombol
-    const fb = document.getElementById('feedback');
-    fb.textContent = 'Atur ketiga pasangan huruf di atas.';
-    fb.className = 'feedback';
-
-    document.getElementById('stage-label').textContent = 'Rapatkan jarak — ' + r.word;
-    const btn = document.getElementById('btn-submit');
-    btn.disabled = false;
-    btn.textContent = 'Periksa';
-
-    applyKerning();
-  }
-
-  /* ============ SLIDER ============ */
-  function onSlide(i, raw){
-    if(locked) return;
-    values[i] = parseInt(raw);
-    applyKerning();
-    refreshPair(i);
-    refreshFeedback();
-  }
-
-  function applyKerning(){
-    for(let i=0;i<<3;i++){
-      const ch = document.getElementById('ch-'+i);
-      if(ch) ch.style.marginRight = (values[i]*SCALE) + 'px';
-    }
-  }
-
-  function gapScore(i){
-    const diff = Math.abs(values[i] - ROUNDS[roundIndex].optimal[i]);
-    if(diff <= 1) return 100;
-    if(diff <= 3) return 80;
-    if(diff <= 5) return 55;
-    if(diff <= 8) return 25;
-    return 8;
-  }
-
-  function refreshPair(i){
-    const diff = Math.abs(values[i] - ROUNDS[roundIndex].optimal[i]);
-    const pair = document.getElementById('pair-'+i);
-    const readout = document.getElementById('readout-'+i);
-    const val = readout.querySelector('.val');
-    const v = values[i];
-    val.textContent = v > 0 ? '+'+v : ''+v;
-
-    readout.className = 'readout';
-    pair.className = 'pair';
-    if(diff <= 1){ readout.classList.add('good'); pair.classList.add('locked-in'); }
-    else if(diff <= 3){ readout.classList.add('near'); pair.classList.add('hot'); }
-    else { pair.classList.add('hot'); }
-  }
-
-  function currentScore(){
-    return Math.round((gapScore(0)+gapScore(1)+gapScore(2))/3);
-  }
-
-  function refreshFeedback(){
-    const s = currentScore();
-    const fb = document.getElementById('feedback');
-    fb.className = 'feedback ' + (s>=TARGET?'good':'');
-    fb.innerHTML = `Perkiraan saat ini · <span class="pct">${s}%</span>` +
-      (s>=TARGET ? ' — sudah lewat target!' : ' — terus rapikan.');
-  }
-
-  /* ============ PERIKSA ============ */
-  function submitRound(){
-    if(locked) return;
-    locked = true;
-    const score = currentScore();
-    roundScores[roundIndex] = score;
-
-    const fb = document.getElementById('feedback');
-    const btn = document.getElementById('btn-submit');
-
-    if(score >= TARGET){
-      fb.className = 'feedback good';
-      fb.innerHTML = `Babak ${roundIndex+1} lolos · <span class="pct">${score}%</span> ✓`;
-      // tandai progress selesai
-      const bars = document.querySelectorAll('#progress span');
-      bars[roundIndex].className = 'done';
-      btn.disabled = true;
-
-      setTimeout(()=>{
-        if(roundIndex < ROUNDS.length-1){
-          roundIndex++;
-          initRound();
-        } else {
-          showResult();
+        // ==================== NAVIGATION ====================
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-      }, 1100);
-    } else {
-      fb.className = 'feedback bad';
-      fb.innerHTML = `Baru <span class="pct">${score}%</span> · belum 70%. Ayo rapikan lagi!`;
-      document.getElementById('stage').classList.add('shake');
-      setTimeout(()=>document.getElementById('stage').classList.remove('shake'),420);
-      btn.textContent = 'Coba lagi';
-      btn.onclick = ()=>{ btn.onclick = submitRound; initRound(); };
-      locked = false;
-    }
-  }
 
-  function resetRound(){
-    if(locked) return;
-    initRound();
-  }
+        function goToGame() {
+            showScreen('screen-game');
+            initGame();
+        }
 
-  /* ============ HASIL ============ */
-  function showResult(){
-    showScreen('screen-result');
-    const avg = Math.round(roundScores.reduce((a,b)=>a+b,0)/roundScores.length);
+        function goToFarewell() {
+            showScreen('screen-farewell');
+            document.getElementById('screen-farewell').scrollIntoView({ behavior: 'smooth' });
+        }
 
-    // animasi angka
-    const numEl = document.getElementById('final-num');
-    let n = 0;
-    const step = Math.max(1, Math.round(avg/28));
-    const tick = setInterval(()=>{
-      n += step;
-      if(n >= avg){ n = avg; clearInterval(tick); }
-      numEl.textContent = n;
-    }, 28);
+        // ==================== INIT ====================
+        function initGame() {
+            values = [0, 0, 0];
+            isLocked = false;
 
-    const msg = document.getElementById('result-msg');
-    if(avg >= 90)      msg.textContent = 'Nyaris sempurna. Mata seorang desainer sejati — Mbak Afril pasti bangga.';
-    else if(avg >= 78) msg.textContent = 'Rapi sekali. Kerning-mu enak dilihat dari jarak manapun.';
-    else               msg.textContent = 'Tantangan terlewati. Tidak ada lubang yang lolos dari matamu.';
+            // Reset sliders
+            for (let i = 0; i < 3; i++) {
+                const slider = document.getElementById(`slider-${i}`);
+                const num = document.getElementById(`num-${i}`);
+                if (slider) slider.value = 0;
+                if (num) num.textContent = '0';
+            }
 
-    const recap = document.getElementById('round-recap');
-    recap.innerHTML = '';
-    ROUNDS.forEach((r,i)=>{
-      const chip = document.createElement('div');
-      chip.className = 'recap-chip';
-      chip.innerHTML = `<div class="w">${r.word}</div><div class="s">${roundScores[i]}%</div>`;
-      recap.appendChild(chip);
-    });
-  }
-</script>
+            // Reset letters
+            for (let i = 0; i < 4; i++) {
+                const char = document.getElementById(`char-${i}`);
+                if (char) char.style.marginRight = '0px';
+            }
+
+            // Reset gap lines
+            for (let i = 0; i < 3; i++) {
+                const line = document.getElementById(`gapline-${i}`);
+                if (line) {
+                    line.className = 'gap-line';
+                    line.style.width = '100%';
+                }
+            }
+
+            // Reset feedback
+            const fb = document.getElementById('feedback');
+            fb.innerHTML = '<div>Geser slider sampai garisnya hijau!</div><div class="live-score" id="live-score"></div>';
+            fb.className = 'feedback-area neutral';
+
+            // Reset button
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = false;
+            btn.textContent = '▶ SUBMIT';
+
+            // Remove animations
+            document.getElementById('word-box').classList.remove('flash-fail');
+            document.getElementById('letters-row').classList.remove('shake');
+        }
+
+        // ==================== SLIDER ====================
+        function onSliderChange(index, value) {
+            if (isLocked) return;
+
+            const val = parseInt(value);
+            values[index] = val;
+
+            // Update number display
+            const numEl = document.getElementById(`num-${index}`);
+            if (numEl) numEl.textContent = val > 0 ? `+${val}` : `${val}`;
+
+            // Apply visual kerning
+            applyKerning();
+
+            // Update gap line color (live feedback!)
+            updateGapFeedback(index, val);
+
+            // Update live score preview
+            updateLiveScore();
+        }
+
+        function applyKerning() {
+            // W gets margin-right based on gap 0
+            const charW = document.getElementById('char-0');
+            if (charW) charW.style.marginRight = `${values[0]}px`;
+
+            // A gets margin-right based on gap 1
+            const charA = document.getElementById('char-1');
+            if (charA) charA.style.marginRight = `${values[1]}px`;
+
+            // V gets margin-right based on gap 2
+            const charV = document.getElementById('char-2');
+            if (charV) charV.style.marginRight = `${values[2]}px`;
+        }
+
+        function updateGapFeedback(index, val) {
+            const optimal = OPTIMAL[index];
+            const diff = Math.abs(val - optimal);
+            const line = document.getElementById(`gapline-${index}`);
+
+            if (!line) return;
+
+            // Color based on how close
+            if (diff <= 1) {
+                line.className = 'gap-line good'; // Green = perfect
+            } else if (diff <= 3) {
+                line.className = 'gap-line ok';   // Orange = close
+            } else {
+                line.className = 'gap-line bad';  // Red = far
+            }
+
+            // Width shows intensity (closer = thicker)
+            const intensity = Math.max(30, 100 - diff * 8);
+            line.style.width = `${intensity}%`;
+        }
+
+        function updateLiveScore() {
+            let earned = 0;
+            for (let i = 0; i < 3; i++) {
+                const diff = Math.abs(values[i] - OPTIMAL[i]);
+                let score = 0;
+                if (diff <= 1) score = 100;
+                else if (diff <= 3) score = 70;
+                else if (diff <= 5) score = 40;
+                else score = 10;
+                earned += score;
+            }
+            const preview = Math.round(earned / 3);
+            const liveEl = document.getElementById('live-score');
+            if (liveEl) {
+                liveEl.textContent = `Preview: ~${preview}%`;
+                liveEl.style.color = preview >= 70 ? '#3fb950' : preview >= 50 ? '#f0883e' : '#f85149';
+            }
+        }
+
+        // ==================== SUBMIT ====================
+        function submitGame() {
+            if (isLocked) return;
+            isLocked = true;
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            // Calculate final score
+            let earned = 0;
+            for (let i = 0; i < 3; i++) {
+                const diff = Math.abs(values[i] - OPTIMAL[i]);
+                let pairScore = 0;
+
+                if (diff <= 1) pairScore = 100;           // Perfect
+                else if (diff <= 3) pairScore = 70;       // Good
+                else if (diff <= 5) pairScore = 40;       // OK
+                else if (diff <= 7) pairScore = 20;      // Meh
+                else pairScore = 5;                       // Bad
+
+                earned += pairScore;
+            }
+
+            const score = Math.round(earned / 3);
+
+            // Final feedback
+            const fb = document.getElementById('feedback');
+            if (score >= 85) {
+                fb.innerHTML = `<div style="color:#3fb950; font-size:30px;">✨ ${score}% — Sempurna!</div>`;
+                fb.className = 'feedback-area success';
+            } else if (score >= 70) {
+                fb.innerHTML = `<div style="color:#3fb950; font-size:30px;">👍 ${score}% — Bagus!</div>`;
+                fb.className = 'feedback-area success';
+            } else if (score >= 50) {
+                fb.innerHTML = `<div style="color:#f0883e; font-size:30px;">💭 ${score}% — Hampir...</div>`;
+                fb.className = 'feedback-area fail';
+            } else {
+                fb.innerHTML = `<div style="color:#f85149; font-size:30px;">📚 ${score}% — Coba lagi</div>`;
+                fb.className = 'feedback-area fail';
+            }
+
+            setTimeout(() => showResult(score), 1500);
+        }
+
+        // ==================== RESULT ====================
+        function showResult(score) {
+            showScreen('screen-result');
+
+            const emoji = document.getElementById('res-emoji');
+            const title = document.getElementById('res-title');
+            const scoreEl = document.getElementById('res-score');
+            const msg = document.getElementById('res-msg');
+            const countdown = document.getElementById('countdown');
+            const unlockBtn = document.getElementById('btn-unlock');
+
+            scoreEl.textContent = `${score}%`;
+
+            if (score >= TARGET) {
+                // SUCCESS
+                emoji.textContent = '🎉';
+                title.textContent = 'SURAT TERBUKA!';
+                title.style.color = '#3fb950';
+                msg.innerHTML = `Skor <span style="color:#ffd700;">${score}%</span> memenuhi target.<br>Selamat! Surat perpisahan sudah bisa dibaca.`;
+                countdown.textContent = '';
+                unlockBtn.classList.add('show');
+
+            } else {
+                // FAIL — AUTO REPLAY
+                emoji.textContent = '💪';
+                title.textContent = 'BELUM CUKUP...';
+                title.style.color = '#f85149';
+                msg.innerHTML = `Skor <span style="color:#f85149;">${score}%</span>, targetnya ${TARGET}%.<<br>Ayo coba sekali lagi!`;
+
+                let sec = 3;
+                countdown.innerHTML = `Otomatis mencoba lagi dalam <span>${sec}</span>...`;
+
+                const timer = setInterval(() => {
+                    sec--;
+                    if (sec > 0) {
+                        countdown.innerHTML = `Otomatis mencoba lagi dalam <span>${sec}</span>...`;
+                    } else {
+                        clearInterval(timer);
+                        autoReplay();
+                    }
+                }, 1000);
+
+                unlockBtn.classList.remove('show');
+            }
+        }
+
+        // ==================== AUTO REPLAY ====================
+        function autoReplay() {
+            showScreen('screen-game');
+
+            // Flash red border
+            const wordBox = document.getElementById('word-box');
+            wordBox.classList.add('flash-fail');
+            setTimeout(() => wordBox.classList.remove('flash-fail'), 1200);
+
+            // Shake letters
+            const letters = document.getElementById('letters-row');
+            letters.classList.add('shake');
+            setTimeout(() => letters.classList.remove('shake'), 500);
+
+            initGame();
+        }
+
+        // ==================== RESET ====================
+        function resetGame() {
+            if (isLocked) return;
+            initGame();
+        }
+    </script>
 </body>
 </html>
